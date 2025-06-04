@@ -1,6 +1,14 @@
 from mcp.server.fastmcp import FastMCP
-from mcp_util import AuthManager
 import time
+import os
+import sys
+# Get the current script's directory
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# Add the parent directory to sys.path
+sys.path.append(os.path.dirname(current_dir))
+from .mcp_util import AuthManager
+import time
+
 # # 初始化 FastMCP 服务器
 mcp = FastMCP('xhs')
 
@@ -51,12 +59,16 @@ async def create_note(phone_number: str, title: str, content: str, image_urls: l
     """
     auth_manager = AuthManager(phone_number)
     msg = auth_manager.login_without_verification_code()
-    time.sleep(5) # Wait for the login process to complete
+    # time.sleep(5) # Wait for the login process to complete
     if msg != "登录成功":
         return "未登录," + msg
     msg = await auth_manager.create_note(title, content, image_urls)
     return msg
 
+def main():
+    # 启动 MCP 服务器
+    mcp.run(transport='stdio')
+    
 if __name__ == "__main__":
     # 以标准 I/O 方式运行 MCP 服务器
-    mcp.run(transport='stdio')
+    main()
