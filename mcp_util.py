@@ -11,9 +11,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+
+import pyperclip
+import platform
 
 from .image_generate import image_generation_deepseek, download_and_save_images
 import asyncio # 确保导入 asyncio
+from selenium.webdriver.firefox.service import Service
 
 import time
 import json
@@ -32,26 +37,15 @@ logging.basicConfig(
     encoding='utf-8'
 )
 logger = logging.getLogger(__name__)
+
+
 class AuthManager:
     def __init__(self, phone_number):
         self.phone_number = phone_number
         if not os.path.exists('./cookies'):
             os.makedirs('./cookies')
         self.COOKIE_FILE = f'./cookies/{phone_number}.json'
-        # Use a headless browser if you don't need to see the browser window
-        options = webdriver.ChromeOptions()
-        # For headless mode
-        # options.add_argument('--headless')
-        # options.add_argument("--disable-gpu")
-
-        # options.add_argument('--no-sandbox')
-        # chrome_options.add_argument('window-size=1920x1080')#页面部分内容是动态加载得时候，无头模式默认size为0x0，需要设置最大化窗口并设置windowssize，不然会出现显示不全的问题
-        # chrome_options.add_argument('--start-maximized')    #页面部分内容是动态加载得时候，无头模式默认size为0x0，需要设置最大化窗口并设置windowssize，不然会出现显示不全的问题
-        # user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.7103.113 Safari/537.36"
-        # options.add_argument(f"user-agent={user_agent}")        
-        # options.add_argument("--disable-blink-features=AutomationControlled")  # 隐藏自动化特征
-        # options.add_argument('--disable-dev-shm-usage')
-        self.driver = webdriver.Chrome(options=options) # Or use Firefox, Edge, etc.
+        self.driver = webdriver.Chrome()
         self.driver.maximize_window()
 
         self.has_cookie = self.load_cookies()
@@ -103,6 +97,25 @@ class AuthManager:
         except Exception as e:
             logger.error(f'加载cookies出错: {str(e)}')
             return False
+        
+    def send_keys_with_emoji(self, element, text):
+        try:
+            pyperclip.copy(text)  # 向剪贴板写入文本
+        except Exception as e:
+            print(repr(e))
+
+        # 判断操作系统
+        current_os = platform.system()
+
+        if current_os == "Darwin":  # macOS
+            element.send_keys(Keys.COMMAND, 'v')  # 使用 Command + V 粘贴
+        elif current_os in ["Windows", "Linux"]:
+            element.send_keys(Keys.CONTROL, 'v')  # 使用 Ctrl + V 粘贴
+        else:
+            logger.error(f"不支持的操作系统: {current_os}")
+            raise Exception("不支持的操作系统")
+
+        element.send_keys(Keys.ENTER)  # 回车确认
 
     async def create_note(self, title, content, image_urls):
         # 会在成功登录的情况调用该函数。
@@ -111,7 +124,7 @@ class AuthManager:
         image_generation_task = None
         if len(image_urls) == 0:
             logger.info("未提供图片URL，开始异步生成图片")
-            # 注意：image_generation_gemini 现在是异步的
+            # 注意：image_generation_deepseek 现在是异步的
             image_generation_task = asyncio.create_task(image_generation_deepseek(title))
         else:
             # 如果提供了URL，则异步下载它们
@@ -123,10 +136,11 @@ class AuthManager:
             time.sleep(3)
             if self.driver.current_url != "https://creator.xiaohongshu.com/publish/publish?from=menu":
                 return "登录失败"
-
-            tabs = self.driver.find_elements(By.CSS_SELECTOR, ".creator-tab")
-            if len(tabs) > 1:
-                tabs[2].click()
+            # CSS-Selector: div.creator-tab:nth-child(3)
+            tabs = WebDriverWait(self.driver, 20).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "div.creator-tab:nth-child(3)"))
+            )
+            tabs.click()
             time.sleep(1)
             logger.info("点击了上传图文按钮")
         except Exception as e:
@@ -136,7 +150,7 @@ class AuthManager:
         
         # 在等待图片生成/下载的同时，可以执行一些不依赖图片的浏览器操作
         # 例如，导航到页面，点击按钮等，如果这些操作可以在图片准备好之前完成
-
+        # image_urls = ["E:\\Code\\funny\\my_rednote_mcp\\xhs\\src\\tmp\\images\\deepseek_image_1749181891241_4ng5zf.png"]
         # 等待图片生成/下载任务完成
         if image_generation_task:
             image_urls = await image_generation_task
@@ -156,8 +170,18 @@ class AuthManager:
             # 将图片文件路径发送给输入框
             # Selenium会自动处理多个文件路径，用换行符分隔
             image_paths_string = "\n".join(image_urls) # image_urls 应该是本地文件路径列表
-            # # TODO:For test
-            # image_paths_string = "C:/Users/1c1/Desktop/公众号推文/创建公众号文章预览图.png"
+
+            # 调试：检查每个图片路径是否存在
+            for img_path in image_urls:
+                if not os.path.exists(img_path):
+                    logger.error(f"图片文件不存在: {img_path}")
+                    # 可以选择在这里抛出异常或返回错误信息
+                    return f"创建笔记失败: 图片文件不存在: {img_path}"
+                else:
+                    logger.info(f"图片文件存在: {img_path}")
+
+            logger.info(f"准备发送给Selenium的文件路径字符串:\n{image_paths_string}")
+
             file_input.send_keys(image_paths_string)
             logger.info(f"已发送 {len(image_urls)} 个图片文件路径")
 
@@ -167,13 +191,19 @@ class AuthManager:
             title_input = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, ".d-text"))
             )
-            title_input.send_keys(title)
+            if len(title) > 20:
+                title = title[:20]
+            self.send_keys_with_emoji(title_input, title)
+            # title_input.send_keys(title)
             logger.info(f"已输入标题: {title}")
+            time.sleep(1)
             # 内容HTML代码:<div class="ql-editor ql-blank" contenteditable="true" aria-owns="quill-mention-list" data-placeholder="输入正文描述，真诚有价值的分享予人温暖"><p><br></p></div>
             content_input = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, ".ql-editor"))
             )
-            content_input.send_keys(content)
+            self.send_keys_with_emoji(content_input, content)
+
+            # content_input.send_keys(content)
             logger.info(f"已输入内容: {content}")
             # 发布按钮HTML代码:<span class="d-text --color-static --color-current --size-text-paragraph d-text-nowrap d-text-ellipsis d-text-nowrap" style="text-underline-offset: auto;"><!---->发布<!----><!----><!----></span>
             # 发布button HTML代码：<button data-v-34b0c0bc="" data-v-30daec93="" data-v-0624972c-s="" type="button" class="d-button d-button-large --size-icon-large --size-text-h6 d-button-with-content --color-static bold --color-bg-fill --color-text-paragraph custom-button red publishBtn" data-impression="{&quot;noteTarget&quot;:{&quot;type&quot;:&quot;NoteTarget&quot;,&quot;value&quot;:{&quot;noteEditSource&quot;:1,&quot;noteType&quot;:1}},&quot;event&quot;:{&quot;type&quot;:&quot;Event&quot;,&quot;value&quot;:{&quot;targetType&quot;:{&quot;type&quot;:&quot;RichTargetType&quot;,&quot;value&quot;:&quot;note_compose_target&quot;},&quot;action&quot;:{&quot;type&quot;:&quot;NormalizedAction&quot;,&quot;value&quot;:&quot;impression&quot;},&quot;pointId&quot;:50979}},&quot;page&quot;:{&quot;type&quot;:&quot;Page&quot;,&quot;value&quot;:{&quot;pageInstance&quot;:{&quot;type&quot;:&quot;PageInstance&quot;,&quot;value&quot;:&quot;creator_service_platform&quot;}}}}"><div class="d-button-content"><!----><span class="d-text --color-static --color-current --size-text-paragraph d-text-nowrap d-text-ellipsis d-text-nowrap" style="text-underline-offset: auto;"><!---->发布<!----><!----><!----></span><!----></div></button>
@@ -315,7 +345,8 @@ if __name__ == "__main__":
     # msg = auth.login_without_verification_code()
     
     async def main():
-        msg = await auth.create_note('上海', '上海是一座充满魅力的城市，拥有丰富的历史和现代文化。从外滩的万国建筑群到陆家嘴的摩天大楼，上海展现了传统与现代的完美融合。漫步在南京路步行街，感受繁华的都市气息；或是探访田子坊，体验独特的艺术氛围。无论是美食、购物还是文化体验，上海都能满足你的需求。', [])
+        # msg = await auth.create_note('🔥3年亚马逊老司机吐血整理！', '🔥3年亚马逊老司机吐血整理！', [])
+        msg = await auth.create_note('🔥3年亚马逊老司机吐血整理！', '🔥', [])
     
 
     asyncio.run(main())

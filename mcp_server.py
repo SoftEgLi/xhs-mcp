@@ -8,7 +8,16 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(current_dir))
 from .mcp_util import AuthManager
 import time
-
+import logging
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    filename='./app.log',
+    filemode='a',
+    encoding='utf-8'
+)
+logger = logging.getLogger(__name__)
 # # 初始化 FastMCP 服务器
 mcp = FastMCP('xhs')
 
@@ -57,7 +66,9 @@ async def create_note(phone_number: str, title: str, content: str, image_urls: l
     Returns:
         发布结果
     """
+    logger.info("Calling Create_note")
     auth_manager = AuthManager(phone_number)
+    logger.info("Auth_manager created")
     msg = auth_manager.login_without_verification_code()
     # time.sleep(5) # Wait for the login process to complete
     if msg != "登录成功":
