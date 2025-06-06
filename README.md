@@ -15,7 +15,7 @@ pip install uv
 在生成小红书文案的配图时，用到了DeepSeek的chat模型，所以需要配置DEEPSEEK_API_KEY。
 ### 方式1：直接运行命令
 ```
-env DEEPSEEK_API_KEY=xxxx uvx --from lcl_xhs_mcp@latest xhs-server
+env DEEPSEEK_API_KEY=xxxx uvx --from lcl_xhs_mcp==0.3.25 xhs-server
 ```
 ### 方式2: 配置文件运行
 在配置文件中添加
@@ -28,7 +28,7 @@ env DEEPSEEK_API_KEY=xxxx uvx --from lcl_xhs_mcp@latest xhs-server
         "DEEPSEEK_API_KEY=xxxx",
         "uvx",
         "--from",
-        "lcl_xhs_mcp@latest",
+        "lcl_xhs_mcp==0.3.25",
         "xhs-server"
       ]
     }
