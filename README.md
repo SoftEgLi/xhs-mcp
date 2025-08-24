@@ -4,7 +4,7 @@
 
 ## 原理
 
-使用浏览器模拟的方式，通过 Chrome 驱动启动浏览器，来自动进行账号登录（会发送验证码到手机上），以及发布文案。登录后，会将 Cookie 保存下来，之后发布文章就不再需要重新登录了。项目已集成 webdriver-manager，无需手动下载和配置 Chrome 驱动，只需下载 Chrome 浏览器本体即可（下载地址：https://www.google.com/intl/zh-CN/chrome/）。
+使用浏览器模拟的方式，通过 Chrome 驱动启动浏览器，来自动进行账号登录（会发送验证码到手机上），以及发布文案。登录后，会将 Cookie 保存下来，之后发布文章就不再需要重新登录了。项目已集成 webdriver-manager，无需手动下载和配置 Chrome 驱动，只需下载并安装 Chrome 浏览器本体即可（下载地址：https://www.google.com/intl/zh-CN/chrome/）。
 
 ## 示例
 
@@ -12,7 +12,7 @@
 
 ## 环境配置
 
-1. 确保系统已安装 Chrome 浏览器（项目会自动管理对应的驱动程序，不需要手动下载驱动程序，只要手动下载浏览器本体即可），下载地址（https://www.google.com/intl/zh-CN/chrome/）
+1. 确保系统已安装 Chrome 浏览器（项目会自动管理对应的驱动程序，不需要手动下载驱动程序，只要手动下载并安装浏览器本体即可），下载地址（https://www.google.com/intl/zh-CN/chrome/）
 2. 安装 uv
 
 ```
