@@ -17,7 +17,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 api_key = os.getenv("DEEPSEEK_API_KEY")
-base_url = "https://api.deepseek.com"
+base_url = os.getenv("BASE_URL", "https://api.deepseek.com")
 
 client = OpenAI(api_key=api_key, base_url=base_url)
 # Please install OpenAI SDK first: `pip3 install openai`

@@ -343,7 +343,7 @@ class AuthManager:
 
 if __name__ == "__main__":
     # Replace with the phone number you want to use
-    your_phone_number = "15751239778"
+    your_phone_number = "xxxx"
     
     # IMPORTANT: You will need to manually enter the verification code in the browser window that opens.
     auth = AuthManager(your_phone_number)

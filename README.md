@@ -16,18 +16,26 @@
 2. 安装 uv
 
 ```
-pip install uv
+pip install uv # 注意，如果使用anaconda进行环境管理，需要在base环境中pip
 ```
 
 ## 启动服务器
 
-在发布图文时，必须有一张配图才可以发布。所以在调用发布文案工具时会自动根据文案生成一张小红书风格的配图。在生成小配图时，用到了 DeepSeek 的 chat 模型，所以需要配置 DEEPSEEK_API_KEY 这个环境变量。
+在发布图文时，必须有一张配图才可以发布。所以在调用发布文案工具时会自动根据文案生成一张小红书风格的配图。在生成小配图时，用到了 DeepSeek 的 chat 模型，所以需要配置 DEEPSEEK_API_KEY 这个环境变量。如果需要切换到其它模型，请配置 BASE_URL 环境变量，默认为 DEEPSEEK 的地址。
 
 ### 方式 1：直接运行命令
 
 ```
-env DEEPSEEK_API_KEY=xxxx uvx --from lcl_xhs_mcp==0.4.1 xhs-server
+env DEEPSEEK_API_KEY=xxxx uvx --from lcl_xhs_mcp@latest xhs-server
 ```
+
+若切换模型:
+
+```
+env DEEPSEEK_API_KEY=xxxx BASE_URL=xxxx uvx --from lcl_xhs_mcp@latest xhs-server
+```
+
+为避免冗长，下面的方式介绍中会省略掉 BASE_URL 环境变量的配置。
 
 ### 方式 2: 配置文件运行
 
@@ -42,9 +50,35 @@ env DEEPSEEK_API_KEY=xxxx uvx --from lcl_xhs_mcp==0.4.1 xhs-server
         "DEEPSEEK_API_KEY=xxxx",
         "uvx",
         "--from",
-        "lcl_xhs_mcp==0.4.1",
+        "lcl_xhs_mcp@latest",
         "xhs-server"
       ]
+    }
+  }
+}
+```
+
+### 方式 3: 源码安装并运行
+
+这种方式能够获得最新的代码。
+
+```
+git clone https://github.com/SoftEgLi/xhs-mcp.git
+cd xhs-mcp
+pip install -e . # 注意，如果安装了anaconda，需要在base环境中进行pip
+```
+
+MCP 配置文件:
+
+```
+{
+  "mcpServers": {
+    "xhs-test": {
+      "command": "xhs-server",
+      "args": [],
+      "env": {
+        "DEEPSEEK_API_KEY": "xxxx"
+      }
     }
   }
 }
