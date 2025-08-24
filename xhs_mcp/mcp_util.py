@@ -12,13 +12,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
 
 import pyperclip
 import platform
 
 from .image_generate import image_generation_deepseek, download_and_save_images
 import asyncio # 确保导入 asyncio
-from selenium.webdriver.firefox.service import Service
 
 import time
 import json
@@ -45,9 +46,9 @@ class AuthManager:
         if not os.path.exists('./cookies'):
             os.makedirs('./cookies')
         self.COOKIE_FILE = f'./cookies/{phone_number}.json'
-        # geckodriver_path = '/usr/local/bin/geckodriver'
-        # service = Service(geckodriver_path) 
-        self.driver = webdriver.Chrome()
+        # 使用webdriver-manager自动管理Chrome驱动程序
+        chrome_service = ChromeService(ChromeDriverManager().install())
+        self.driver = webdriver.Chrome(service=chrome_service)
         self.driver.maximize_window()
 
         self.has_cookie = self.load_cookies()

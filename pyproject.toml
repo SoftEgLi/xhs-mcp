@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lcl_xhs_mcp"
-version = "0.4.0"
+version = "0.4.1"
 description = "A Model Context Protocol (MCP) server for Xiaohongshu (Little Red Book) automation"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -24,6 +24,8 @@ dependencies = [
     "httpx",
     "openai",
     "html2image",
+    "fastmcp",
+    "webdriver-manager",
 ]
 
 [project.scripts]

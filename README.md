@@ -4,7 +4,7 @@
 
 ## 原理
 
-使用浏览器模拟的方式，通过驱动启动谷歌浏览器，来自动进行账号登录（会发送验证码到手机上），以及发布文案。登录后，会将 Cookie 保存下来，之后发布文章就不再需要重新登录了。
+使用浏览器模拟的方式，通过 Chrome 驱动启动浏览器，来自动进行账号登录（会发送验证码到手机上），以及发布文案。登录后，会将 Cookie 保存下来，之后发布文章就不再需要重新登录了。项目已集成 webdriver-manager，无需手动下载和配置 Chrome 驱动，只需下载 Chrome 浏览器本体即可（下载地址：https://www.google.com/intl/zh-CN/chrome/）。
 
 ## 示例
 
@@ -12,7 +12,7 @@
 
 ## 环境配置
 
-1. 查找你的 Chrome 浏览器版本，例如 "136.0.7103.93"然后到https://googlechromelabs.github.io/chrome-for-testing/ 上下载对应版本的 chromedriver，解压后将 chromedriver.exe 所在的文件夹添加到环境变量的 Path 中。
+1. 确保系统已安装 Chrome 浏览器（项目会自动管理对应的驱动程序，不需要手动下载驱动程序，只要手动下载浏览器本体即可），下载地址（https://www.google.com/intl/zh-CN/chrome/）
 2. 安装 uv
 
 ```
@@ -21,12 +21,12 @@ pip install uv
 
 ## 启动服务器
 
-在发布图文时，必须有一张配图才可以发布。所以在调用发布文案工具时会自动根据文案生成一张小红书风格的配图。在生成小配图时，用到了 DeepSeek 的 chat 模型，所以需要配置 DEEPSEEK_API_KEY。
+在发布图文时，必须有一张配图才可以发布。所以在调用发布文案工具时会自动根据文案生成一张小红书风格的配图。在生成小配图时，用到了 DeepSeek 的 chat 模型，所以需要配置 DEEPSEEK_API_KEY 这个环境变量。
 
 ### 方式 1：直接运行命令
 
 ```
-env DEEPSEEK_API_KEY=xxxx uvx --from lcl_xhs_mcp==0.4.0 xhs-server
+env DEEPSEEK_API_KEY=xxxx uvx --from lcl_xhs_mcp==0.4.1 xhs-server
 ```
 
 ### 方式 2: 配置文件运行
@@ -42,7 +42,7 @@ env DEEPSEEK_API_KEY=xxxx uvx --from lcl_xhs_mcp==0.4.0 xhs-server
         "DEEPSEEK_API_KEY=xxxx",
         "uvx",
         "--from",
-        "lcl_xhs_mcp==0.4.0",
+        "lcl_xhs_mcp==0.4.1",
         "xhs-server"
       ]
     }
@@ -52,7 +52,7 @@ env DEEPSEEK_API_KEY=xxxx uvx --from lcl_xhs_mcp==0.4.0 xhs-server
 
 ## 注意事项
 
-Cookie 的有效期是一个月，如果你自己在网页上登录了小红书，那么之前的 Cookie 会失效。
+Cookie 的有效期是一个月，如果你自己在网页上登录了小红书，那么之前的 Cookie 有可能会失效，失效后在发布文章时，会重新走一遍 MCP 的登录流程。
 
 ## 开源协议
 
