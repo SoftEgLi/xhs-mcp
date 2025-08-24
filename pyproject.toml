@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lcl_xhs_mcp"
+version = "0.4.0"
+description = "A Model Context Protocol (MCP) server for Xiaohongshu (Little Red Book) automation"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+    "selenium",
+    "pyperclip",
+    "httpx",
+    "openai",
+    "html2image",
+]
+
+[project.scripts]
+xhs-server = "xhs_mcp.mcp_server:main"
+
+[project.urls]
+"Homepage" = "https://github.com/SoftEgLi/xhs-mcp"
+"Bug Reports" = "https://github.com/SoftEgLi/xhs-mcp/issues"
+"Source" = "https://github.com/SoftEgLi/xhs-mcp"
+
+[tool.setuptools.packages.find]
+where = ["."]  # list of folders that contain the packages (["src"] by default)
+include = ["xhs_mcp*"]  # package names should match these glob patterns (["*"] by default)
+exclude = ["tests*"]  # exclude packages matching these glob patterns
+
+[tool.setuptools.package-data]
+xhs_mcp = ["*.py", "*.md", "LICENSE*"]

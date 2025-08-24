@@ -26,7 +26,7 @@ pip install uv
 ### 方式 1：直接运行命令
 
 ```
-env DEEPSEEK_API_KEY=xxxx uvx --from lcl_xhs_mcp==0.3.33 xhs-server
+env DEEPSEEK_API_KEY=xxxx uvx --from lcl_xhs_mcp==0.4.0 xhs-server
 ```
 
 ### 方式 2: 配置文件运行
@@ -42,7 +42,7 @@ env DEEPSEEK_API_KEY=xxxx uvx --from lcl_xhs_mcp==0.3.33 xhs-server
         "DEEPSEEK_API_KEY=xxxx",
         "uvx",
         "--from",
-        "lcl_xhs_mcp==0.3.33",
+        "lcl_xhs_mcp==0.4.0",
         "xhs-server"
       ]
     }
