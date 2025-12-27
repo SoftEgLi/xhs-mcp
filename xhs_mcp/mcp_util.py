@@ -18,7 +18,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import pyperclip
 import platform
 
-from .image_generate import image_generation_deepseek, download_and_save_images
+from xhs_mcp.image_generate import image_generation_deepseek, download_and_save_images
 import asyncio # 确保导入 asyncio
 
 import time
@@ -49,10 +49,11 @@ class AuthManager:
         # 使用webdriver-manager自动管理Chrome驱动程序
         chrome_service = ChromeService(ChromeDriverManager().install())
         self.driver = webdriver.Chrome(service=chrome_service)
-        self.driver.maximize_window()
+        # self.driver.maximize_window()
 
         self.has_cookie = self.load_cookies()
         logger.info(f"cookie文件路径: {os.path.abspath(self.COOKIE_FILE)}")
+        self.driver.get("https://creator.xiaohongshu.com")
         # time.sleep(5)
         time.sleep(1)
 
@@ -152,13 +153,30 @@ class AuthManager:
             
             if self.driver.current_url != "https://creator.xiaohongshu.com/publish/publish?from=menu":
                 return "登录失败"
-            # CSS-Selector: div.creator-tab:nth-child(3)
-            tabs = WebDriverWait(self.driver, 20).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "div.creator-tab:nth-child(3)"))
+
+            # 关闭遮挡层
+            try:
+                tooltip_close_btn = WebDriverWait(self.driver, 2).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, "body > div.d-popover.d-popover-default > div.short-note-tooltip > button > div > span"))
+                )
+                # 点击关闭遮挡层
+                tooltip_close_btn.click()
+                time.sleep(0.3)  # 关闭后稍等，确保弹窗消失
+            except Exception as e:
+                logger.error(f"关闭遮挡层出错: {str(e)}")
+
+            # 切换到上传图文按钮对应的栏目
+            upload_text_elem = WebDriverWait(self.driver, 20).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "#web .header .header-tabs > div:nth-child(3) > span"))
             )
-            tabs.click()
-            time.sleep(1)
-            logger.info("点击了上传图文按钮")
+            upload_text_elem.click()
+            # 点击上传图文按钮
+            # tabs = WebDriverWait(self.driver, 20).until(
+            #     EC.presence_of_element_located((By.CSS_SELECTOR, "#web > div > div > div > div.upload-content > div.upload-wrapper > div > div > div > button:nth-child(1)"))
+            # )
+            # tabs.click()
+            # time.sleep(1)
+            # logger.info("点击了上传图文按钮")
         except Exception as e:
             logger.error(f"点击上传图文按钮出错: {str(e)}")
             return f"创建笔记失败: {str(e)}"
@@ -348,7 +366,7 @@ if __name__ == "__main__":
     # IMPORTANT: You will need to manually enter the verification code in the browser window that opens.
     auth = AuthManager(your_phone_number)
     msg = auth.login_without_verification_code()
-    # msg = auth.login_with_verification_code("019488")
+    # msg = auth.login_with_verification_code("367699")
 
     
     async def main():
